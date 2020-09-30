@@ -37,8 +37,16 @@ app.get("/api/timestamp", (request, response) => {
 
 app.get("/api/timestamp/:date_string",  (req, res) => {
   let { date_string } = req.params;
-  console.log(date_string)
-  res.json({"error" : "Invalid Date"});
+  let userValue = new Date(date_string);
+
+  if (userValue === 'Invalid Date') {
+    res.json({"error" : "Invalid Date"});
+  } else {
+    res.json({
+      "unix" : userValue.getTime(),
+      "utc" : userValue.toUTCString()
+    });
+  }
 });
 
 
