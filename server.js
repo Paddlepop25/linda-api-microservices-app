@@ -23,6 +23,10 @@ app.get("/timestamp", function (req, res) {
   res.sendFile(__dirname + '/views/timestamp.html');
 });
 
+app.get("/requestheaderparser", function (req, res) {
+  res.sendFile(__dirname + '/views/requestheaderparser.html');
+});
+
 // your first API endpoint... 
 app.get("/api/hello", function (req, res) {
   res.json({ greeting: 'hello API' });
@@ -61,6 +65,9 @@ app.get("/api/timestamp/:date_string", (req, res) => {
     })
   }
 });
+
+// {"ipaddress":"::ffff:159.20.14.100","language":"en-US,en;q=0.5",
+// "software":"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0"}
 
 // listen for requests :)
 var listener = app.listen(port, function () {
