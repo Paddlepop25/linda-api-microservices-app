@@ -55,7 +55,7 @@ app.get("/api/timestamp/:date_string", (req, res) => {
   if (date.toString() === 'Invalid Date') {
     date = new Date(parseInt(date_string));
   }
-
+  
   if (date.toString() === 'Invalid Date') {
     res.json({ error: 'Invalid Date' })
   } else {
@@ -66,10 +66,18 @@ app.get("/api/timestamp/:date_string", (req, res) => {
   }
 });
 
-// {"ipaddress":"::ffff:159.20.14.100","language":"en-US,en;q=0.5",
-// "software":"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0"}
+app.get("/api/whoami", (req, res) => {
+  let ipaddress = req.ip;
+  let language = req.headers["accept-language"]
+  let software = req.headers["user-agent"]
+  res.json({
+    ipaddress,
+    language,
+    software
+  })
+})
 
-// listen for requests :)
+// listen for requests
 var listener = app.listen(port, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });
