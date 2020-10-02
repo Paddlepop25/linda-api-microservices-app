@@ -11,7 +11,7 @@ var shortid = require('shortid');
 var app = express();
 var port = process.env.PORT || 3000
 
-console.log(process.env.MONGODB_URI)
+console.log(process.env.MONGODB_URI, "<--------------")
 mongoose.connect(process.env.MONGODB_URI, {useNewUrlParser: true, useUnifiedTopology: true});
 
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
