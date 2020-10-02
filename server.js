@@ -1,83 +1,143 @@
-'use strict';
+// server.js
+// where your node app starts
 
+// init project
 require('dotenv').config();
 var express = require('express');
-var mongo = require('mongodb');
+var mongodb = require('mongodb');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
-var app = express();
-var port = process.env.PORT || 3000;
-var cors = require('cors');
 var shortid = require('shortid');
+var app = express();
+var port = process.env.PORT || 3000
 
-let uri = process.env.MONGODB_URI;
-mongoose.connect(uri, { 
-  useNewUrlParser: true, 
-  useUnifiedTopology: true 
+mongoose.connect(process.env.MONGODB_URI, {useNewUrlParser: true, useUnifiedTopology: true});
+
+// enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
+// so that your API is remotely testable by FCC 
+var cors = require('cors');
+app.use(cors({ optionsSuccessStatus: 200 }));  // some legacy browsers choke on 204
+
+// http://expressjs.com/en/starter/static-files.html
+app.use(express.static('public'));
+
+// http://expressjs.com/en/starter/basic-routing.html
+app.get("/", function (req, res) {
+  res.sendFile(__dirname + '/views/index.html');
 });
 
-app.use(cors());
-
-app.use('/public', express.static(process.cwd() + '/public'));
-
-app.get('/', function(req, res){
-  res.sendFile(process.cwd() + '/views/index.html');
+app.get("/timestamp", function (req, res) {
+  res.sendFile(__dirname + '/views/timestamp.html');
 });
 
-// test api
-app.get('/api/hello', (req, res) => {
-  res.json({
-    hi: 'We are okay'
-  })  
+app.get("/requestheaderparser", function (req, res) {
+  res.sendFile(__dirname + '/views/requestheaderparser.html');
+});
+
+app.get("/urlshortener", function (req, res) {
+  res.sendFile(__dirname + '/views/urlshortener.html');
+});
+
+// testing API endpoint... 
+app.get("/api/hello", function (req, res) {
+  res.json({ greeting: 'hello API' });
+});
+
+// Timestamp Microservice
+// no user input
+app.get("/api/timestamp", (request, response) => {
+  let unix = new Date().getTime();
+  let utc = new Date().toUTCString();
+
+  response.json({
+    unix,
+    utc
+  })
 })
 
-// youtube Useful Programmer
-// Build a schema and model to store saved URLs
-let ShortURL = mongoose.model('ShortURL', new mongoose.Schema({ 
-  short_url: String,
-  original_url: String,
-  suffix: String
+// with user input
+app.get("/api/timestamp/:date_string", (req, res) => {
+  // user's input from req.params.date_string
+  const { date_string } = req.params;
+
+  // make valid date
+  let date = new Date(date_string);
+
+  // if user input is a timestamp e.g 1601506923003
+  if (date.toString() === 'Invalid Date') {
+    date = new Date(parseInt(date_string));
+  }
+  
+  if (date.toString() === 'Invalid Date') {
+    res.json({ error: 'Invalid Date' })
+  } else {
+    res.json({
+      unix: date.getTime(),
+      utc: date.toUTCString()
+    })
+  }
+});
+
+// Request Header Parser Microservice
+app.get("/api/whoami", (req, res) => {
+  let ipaddress = req.ip;
+  let language = req.headers["accept-language"]
+  let software = req.headers["user-agent"]
+  res.json({
+    ipaddress,
+    language,
+    software
+  })
+})
+
+// URL Shortener Microservice
+// define the schema and build a model to store saved urls
+const { Schema } = mongoose;
+let UrlModel = mongoose.model('shortenedUrl', new Schema({
+  original_url:  String,
+  short_url:  String,
+  suffix:  String
 }));
 
-/** this project needs to parse POST bodies **/
-// you should mount the body-parser here
+// parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
-
 // parse application/json
 app.use(bodyParser.json())
 
-app.post('/api/shorturl/new', (req, res) => {
-  
-  let client_requested_url = req.body.url
-  let suffix = shortid.generate();
-  let newShortURL = suffix
-  
-  let newURL = new ShortURL({
-    short_url: client_requested_url + "/api/shorturl/" + suffix,
-    original_url: client_requested_url,
-    suffix: suffix
-  })
-  
-  newURL.save((error, doc) => {
-    if (error) return console.error(error);
-    res.json({
-      short_url: newURL.short_url,
-      original_url: newURL.original_url,
-      suffix: newURL.suffix
-  });
-  });
-}); 
+app.post("/api/shorturl/new", (req, res) => {
+  let userInputUrl = req.body.url; // from input box
+  let suffix = shortid.generate(); // automatically generated
 
-app.get('/api/shorturl/:suffix', (req, res) => {
-  let userGeneratedSuffix = req.params.suffix
-  ShortURL
-    .find({ suffix: userGeneratedSuffix })
-    .then(foundUrls => {
-      let urlForRedirect = foundUrls[0];
-      res.redirect(urlForRedirect.original_url);
-  });
+  console.log("------>", userInputUrl, suffix)
+
+  res.json({
+    "url": userInputUrl,
+    "suffix": suffix
+  })
+  // let newUrl = new UrlModel({
+  //   original_url: userInputUrl,
+  //   short_url: __dirname + "/api/shortcut/" + suffix,
+  //   suffix // suffix: suffix
+  // })
+
+  // newUrl.save((err, doc) => {
+  //   if (err) return console.error(err);
+  //   res.json({
+  //     original_url: newUrl.original_url,
+  //     short_url: newUrl.short_url,
+  //     suffix // suffix: suffix
+  //   })
+  // });
 })
 
-app.listen(port, function () {
-  console.log('Node.js listening ...');
+// app.get("/api/shorturl/:suffix", (req, res) => {
+//   let urlSuffix = req.params.suffix;
+//   UrlModel.findOne({ suffix: urlSuffix }).then(foundUrl => {
+//     res.redirect(foundUrl.original_url);
+//   });
+// })
+
+// listen for requests
+var listener = app.listen(port, function () {
+  console.log('Your app is listening on port ' + listener.address().port);
 });
