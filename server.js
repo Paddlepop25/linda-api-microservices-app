@@ -11,7 +11,11 @@ var shortid = require('shortid');
 var app = express();
 var port = process.env.PORT || 3000
 
-mongoose.connect(process.env.MONGODB_URI, {useNewUrlParser: true, useUnifiedTopology: true});
+let uri = process.env.MONGODB_URI;
+mongoose.connect(uri, { 
+  useNewUrlParser: true, 
+  useUnifiedTopology: true 
+});
 
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
 // so that your API is remotely testable by FCC 
@@ -92,8 +96,7 @@ app.get("/api/whoami", (req, res) => {
 
 // URL Shortener Microservice
 // define the schema and build a model to store saved urls
-const { Schema } = mongoose;
-let UrlModel = mongoose.model('shortenedUrl', new Schema({
+let ShortUrl = mongoose.model('HerokuUrl', new mongoose.Schema({
   original_url:  String,
   short_url:  String,
   suffix:  String
@@ -105,36 +108,39 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
 app.post("/api/shorturl/new", (req, res) => {
-  let userInputUrl = req.body.url; // from input box
+  let client_requested_url = req.body.url; // from input box
   let suffix = shortid.generate(); // automatically generated
 
+  // this works
   // res.json({
-  //   1: userInputUrl,
+  //   1: client_requested_url,
   //   2: suffix
   // })
-  let newUrl = new UrlModel({
-    original_url: userInputUrl,
-    short_url: userInputUrl + "/api/shorturl/" + suffix,
-    suffix // suffix: suffix
+  let newUrl = new ShortUrl({
+    original_url: client_requested_url,
+    short_url: client_requested_url + "/api/shorturl/" + suffix,
+    suffix: suffix // suffix: suffix
   })
 
+  // this works
   // res.json({
   //   'info': newUrl
   // })
 
+  // app hang at this save
   newUrl.save((err, doc) => {
     if (err) return console.error(err);
     res.json({
       original_url: newUrl.original_url,
       short_url: newUrl.short_url,
-      suffix // suffix: suffix
+      suffix: newUrl.suffix // suffix: suffix
     });
   });
 });
 
 // app.get("/api/shorturl/:suffix", (req, res) => {
   // let urlSuffix = req.params.suffix;
-  // UrlModel.findOne({ suffix: urlSuffix }).then(foundUrl => {
+  // ShortUrl.findOne({ suffix: urlSuffix }).then(foundUrl => {
   //   res.redirect(foundUrl.original_url);
   // });
 //   res.json({
