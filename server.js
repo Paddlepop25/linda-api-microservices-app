@@ -163,7 +163,7 @@ app.get('/api/shorturl/:input', (req, res) => {
     if(!error && result !== undefined) {
       res.redirect(result.original)
     } else {
-      res.json('URL not found')
+      res.json('URL not founds')
     }
   })
 })
