@@ -146,7 +146,7 @@ app.post("/api/shorturl/new", (req, res) => {
 //   ShortUrl.findOne({ suffix: urlSuffix }).then(foundUrl => {
 //     res.redirect(foundUrl.original_url);
 //   });
-// })
+})
 
 // listen for requests
 var listener = app.listen(port, function () {
