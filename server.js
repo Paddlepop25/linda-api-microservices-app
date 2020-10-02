@@ -2,6 +2,7 @@
 // where your node app starts
 
 // init project
+require('dotenv').config();
 var express = require('express');
 var mongodb = require('mongodb');
 var mongoose = require('mongoose');
@@ -9,7 +10,6 @@ var bodyParser = require('body-parser');
 var shortid = require('shortid');
 var app = express();
 var port = process.env.PORT || 3000
-require('dotenv').config();
 
 let uri = process.env.MONGODB_URI;
 mongoose.connect(uri, { 
