@@ -3,8 +3,12 @@
 
 // init project
 var express = require('express');
+// var mongo = require('mongo');
+// var mongodb = require('mongodb');
 var app = express();
 var port = process.env.PORT || 3000
+
+mongoose.connect(process.env.DB_URI);
 
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
 // so that your API is remotely testable by FCC 
@@ -27,11 +31,16 @@ app.get("/requestheaderparser", function (req, res) {
   res.sendFile(__dirname + '/views/requestheaderparser.html');
 });
 
-// your first API endpoint... 
+app.get("/urlshortener", function (req, res) {
+  res.sendFile(__dirname + '/views/urlshortener.html');
+});
+
+// testing API endpoint... 
 app.get("/api/hello", function (req, res) {
   res.json({ greeting: 'hello API' });
 });
 
+// Timestamp Microservice
 // no user input
 app.get("/api/timestamp", (request, response) => {
   let unix = new Date().getTime();
@@ -66,6 +75,7 @@ app.get("/api/timestamp/:date_string", (req, res) => {
   }
 });
 
+// Request Header Parser Microservice
 app.get("/api/whoami", (req, res) => {
   let ipaddress = req.ip;
   let language = req.headers["accept-language"]
@@ -75,6 +85,15 @@ app.get("/api/whoami", (req, res) => {
     language,
     software
   })
+})
+
+// URL Shortener Microservice
+app.post("/api/shorturl/new", (req, res) => {
+  console.log(req.params)
+  res.json({
+    success: 'yay'
+  })
+
 })
 
 // listen for requests
