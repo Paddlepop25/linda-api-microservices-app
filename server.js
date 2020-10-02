@@ -116,7 +116,7 @@ app.post("/api/shorturl/new", (req, res) => {
   //   1: client_requested_url,
   //   2: suffix
   // })
-  
+
   let newUrl = new ShortUrl({
     original_url: client_requested_url,
     // short_url: client_requested_url + "/api/shorturl/" + suffix,
@@ -130,24 +130,24 @@ app.post("/api/shorturl/new", (req, res) => {
   })
 
   // app hang at this save
-  // newUrl.save((err, doc) => {
-    // if (err) return console.err(err);
+  newUrl.save((err, doc) => {
+    if (err) return console.err(err);
     // if (err) console.log(err);
-    // res.send('Does this work?')
+    res.send('Does this work?')
     // res.json({
     //   original_url: newUrl.original_url,
     //   short_url: newUrl.short_url,
     //   suffix: newUrl.suffix // suffix: suffix
     // });
-//   });
-// });
+    });
+});
 
 // app.get("/api/shorturl/:suffix", (req, res) => {
 //   let urlSuffix = req.params.suffix;
 //   ShortUrl.findOne({ suffix: urlSuffix }).then(foundUrl => {
 //     res.redirect(foundUrl.original_url);
 //   });
-})
+// })
 
 // listen for requests
 var listener = app.listen(port, function () {
