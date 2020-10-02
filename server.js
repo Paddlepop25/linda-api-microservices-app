@@ -12,8 +12,8 @@ var app = express();
 var port = process.env.PORT || 3000
 
 let uri = process.env.MONGODB_URI;
-console.log(typeof uri)
-mongoose.connect(uri, { 
+console.log(typeof uri, "<-------")
+mongoose.connect(process.env.MONGODB_URI, { 
   useNewUrlParser: true, 
   useUnifiedTopology: true 
 })
