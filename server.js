@@ -2,7 +2,6 @@
 // where your node app starts
 
 // init project
-require('dotenv').config();
 var express = require('express');
 var mongodb = require('mongodb');
 var mongoose = require('mongoose');
@@ -10,6 +9,7 @@ var bodyParser = require('body-parser');
 var shortid = require('shortid');
 var app = express();
 var port = process.env.PORT || 3000
+require('dotenv').config();
 
 let uri = process.env.MONGODB_URI;
 mongoose.connect(uri, { 
@@ -95,79 +95,57 @@ app.get("/api/whoami", (req, res) => {
 })
 
 // URL Shortener Microservice
-let urlSchema = new mongoose.Schema({
-  original: {type: String, required: true},
-  short: Number
-});   
+// define the schema and build a model to store saved urls
+let ShortUrl = mongoose.model('HerokuUrl', new mongoose.Schema({
+  original_url:  String,
+  short_url:  String,
+  suffix:  String
+}));
 
-// make a model out of urlSchema
-let Url = mongoose.model('herokuUrl', urlSchema);
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
+// parse application/json
+app.use(bodyParser.json())
 
-// your first API endpoint... 
-// bodyParser will create field in our req called body
-let responseObject = {}
-app.post('/api/shorturl/new', bodyParser.urlencoded({ extended: false }), (req, res) => {
-  // bodyParser extract form input with the name='url'
-  let inputUrl = req.body['url']
-  
-  let urlRegex = new RegExp(/[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi);
-  
-  if(!inputUrl.match(urlRegex)) {
+app.post("/api/shorturl/new", (req, res) => {
+  let client_requested_url = req.body.url; // from input box
+  let suffix = shortid.generate(); // automatically generated
+
+  // this works
+  // res.json({
+  //   1: client_requested_url,
+  //   2: suffix
+  // })
+  let newUrl = new ShortUrl({
+    original_url: client_requested_url,
+    // short_url: client_requested_url + "/api/shorturl/" + suffix,
+    short_url: __dirname + "/api/shorturl/" + suffix,
+    suffix: suffix // suffix: suffix
+  })
+
+  // this works
+  // res.json({
+  //   'info': newUrl
+  // })
+
+  // app hang at this save
+  newUrl.save((err, doc) => {
+    // if (err) return console.err(err);
+    if (err) console.log(err);
     res.json({
-      error: 'Invalid URL'
-    })
-    return // return so the function stops here if it's an error and don't continue downwards
-  }
-  
-  responseObject['original_url'] = inputUrl
-  
-  // generate the short url and save to database
-  // want to increment each short number for new url put in
-  
-  let inputShort = 1;
-  
-  // empty object; no requirements so it will look through everything
-  Url.findOne({})
-  // sort the short by descending order so you get the highest number one
-    .sort({short: 'desc'})
-    .exec((error, result) => {
-    // no error and found document
-      if(!error && result != undefined) {
-        // the new url will have short incremented
-        inputShort = result.short + 1        
-      }
-      if (!error) {
-        // find one, if it doesn't exist, create it, if it exists, update it
-        // from mongoose: A.findOneAndUpdate(conditions, update, options, callback) // executes
-        Url.findOneAndUpdate(
-          // already exist
-          {original: inputUrl}, // conditions
-          {original: inputUrl, short: inputShort}, // update
-          // new returns the newly updated/saved record. upset creates the object if it doesn't exist
-          {new: true, upsert: true}, // options
-          (error, savedUrl) => { // callback
-            if (!error) {
-              responseObject['short_url'] = savedUrl.short
-              res.json(responseObject);           
-            }
-          }
-        ); 
-      }
-  })
-})
+      original_url: newUrl.original_url,
+      short_url: newUrl.short_url,
+      suffix: newUrl.suffix // suffix: suffix
+    });
+  });
+});
 
-app.get('/api/shorturl/:input', (req, res) => {
-  let { input } = req.params;
-  
-  Url.findOne({ short: input }, (error, result) => {
-    if(!error && result !== undefined) {
-      res.redirect(result.original)
-    } else {
-      res.json('URL not founds')
-    }
-  })
+app.get("/api/shorturl/:suffix", (req, res) => {
+  let urlSuffix = req.params.suffix;
+  ShortUrl.findOne({ suffix: urlSuffix }).then(foundUrl => {
+    res.redirect(foundUrl.original_url);
+  });
 })
-
 
 // listen for requests
 var listener = app.listen(port, function () {
