@@ -118,7 +118,8 @@ app.post("/api/shorturl/new", (req, res) => {
   // })
   let newUrl = new ShortUrl({
     original_url: client_requested_url,
-    short_url: client_requested_url + "/api/shorturl/" + suffix,
+    // short_url: client_requested_url + "/api/shorturl/" + suffix,
+    short_url: __dirname + "/api/shorturl/" + suffix,
     suffix: suffix // suffix: suffix
   })
 
