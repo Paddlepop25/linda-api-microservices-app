@@ -12,7 +12,6 @@ var app = express();
 var port = process.env.PORT || 3000
 
 let uri = process.env.MONGODB_URI;
-console.log(typeof uri, "<-------")
 mongoose.connect(uri, { 
   useNewUrlParser: true, 
   useUnifiedTopology: true 
@@ -112,29 +111,16 @@ app.post("/api/shorturl/new", (req, res) => {
   let client_requested_url = req.body.url; // from input box
   let suffix = shortid.generate(); // automatically generated
 
-  // this works
-  // res.json({
-  //   1: client_requested_url,
-  //   2: suffix
-  // })
-
   let newUrl = new ShortUrl({
     original_url: client_requested_url,
-    // short_url: client_requested_url + "/api/shorturl/" + suffix,
-    short_url: __dirname + "/api/shorturl/" + suffix,
+    short_url: client_requested_url + "/api/shorturl/" + suffix,
+    // short_url: __dirname + "/api/shorturl/" + suffix,
     suffix: suffix // suffix: suffix
   })
-
-  // this works
-  // res.json({
-  //   'info': newUrl
-  // })
 
   // app hang at this save
   newUrl.save((err, doc) => {
     if (err) return console.error(err);
-    // if (err) console.log(err);
-    // res.send('Does this work?')
     res.json({
       "original_url": newUrl.original_url,
       "short_url": newUrl.short_url,
@@ -143,12 +129,12 @@ app.post("/api/shorturl/new", (req, res) => {
     });
 });
 
-// app.get("/api/shorturl/:suffix", (req, res) => {
-//   let urlSuffix = req.params.suffix;
-//   ShortUrl.findOne({ suffix: urlSuffix }).then(foundUrl => {
-//     res.redirect(foundUrl.original_url);
-//   });
-// })
+app.get("/api/shorturl/:suffix", (req, res) => {
+  let urlSuffix = req.params.suffix;
+  ShortUrl.findOne({ suffix: urlSuffix }).then(foundUrl => {
+    res.redirect(foundUrl.original_url);
+  });
+})
 
 // listen for requests
 var listener = app.listen(port, function () {
