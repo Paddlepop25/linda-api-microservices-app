@@ -12,9 +12,13 @@ var app = express();
 var port = process.env.PORT || 3000
 
 let uri = process.env.MONGODB_URI;
+console.log(typeof uri)
 mongoose.connect(uri, { 
   useNewUrlParser: true, 
   useUnifiedTopology: true 
+})
+.then(() => {
+  console.log('DB IS CONNECTED')
 });
 
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
