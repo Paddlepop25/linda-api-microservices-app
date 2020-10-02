@@ -108,15 +108,19 @@ app.post("/api/shorturl/new", (req, res) => {
   let userInputUrl = req.body.url; // from input box
   let suffix = shortid.generate(); // automatically generated
 
-  let newUrl = new UrlModel({
-    original_url: userInputUrl,
-    short_url: userInputUrl + "/api/shorturl/" + suffix,
-    suffix // suffix: suffix
-  })
-
   res.json({
-    'info': newUrl
+    1: userInputUrl,
+    2: suffix
   })
+  // let newUrl = new UrlModel({
+  //   original_url: userInputUrl,
+  //   short_url: userInputUrl + "/api/shorturl/" + suffix,
+  //   suffix // suffix: suffix
+  // })
+
+  // res.json({
+  //   'info': newUrl
+  // })
 
   // newUrl.save((err, doc) => {
   //   if (err) return console.error(err);
@@ -128,15 +132,15 @@ app.post("/api/shorturl/new", (req, res) => {
   // });
 });
 
-app.get("/api/shorturl/:suffix", (req, res) => {
+// app.get("/api/shorturl/:suffix", (req, res) => {
   // let urlSuffix = req.params.suffix;
   // UrlModel.findOne({ suffix: urlSuffix }).then(foundUrl => {
   //   res.redirect(foundUrl.original_url);
   // });
-  res.json({
-    'suffix': req.params.suffix;
-  })
-})
+//   res.json({
+//     'suffix': req.params.suffix;
+//   })
+// })
 
 // listen for requests
 var listener = app.listen(port, function () {
