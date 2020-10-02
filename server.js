@@ -114,21 +114,28 @@ app.post("/api/shorturl/new", (req, res) => {
     suffix // suffix: suffix
   })
 
-  newUrl.save((err, doc) => {
-    if (err) return console.error(err);
-    res.json({
-      original_url: newUrl.original_url,
-      short_url: newUrl.short_url,
-      suffix // suffix: suffix
-    });
-  });
+  res.json({
+    'info': newUrl
+  })
+
+  // newUrl.save((err, doc) => {
+  //   if (err) return console.error(err);
+  //   res.json({
+  //     original_url: newUrl.original_url,
+  //     short_url: newUrl.short_url,
+  //     suffix // suffix: suffix
+  //   });
+  // });
 });
 
 app.get("/api/shorturl/:suffix", (req, res) => {
-  let urlSuffix = req.params.suffix;
-  UrlModel.findOne({ suffix: urlSuffix }).then(foundUrl => {
-    res.redirect(foundUrl.original_url);
-  });
+  // let urlSuffix = req.params.suffix;
+  // UrlModel.findOne({ suffix: urlSuffix }).then(foundUrl => {
+  //   res.redirect(foundUrl.original_url);
+  // });
+  res.json({
+    'suffix': req.params.suffix;
+  })
 })
 
 // listen for requests
