@@ -107,7 +107,7 @@ app.use(bodyParser.json())
 
 app.post("/api/shorturl/new", (req, res) => {
   res.json({
-    'hi': ok
+    'hi': "ok"
   })
   // let userInputUrl = req.body.url; // from input box
   // let suffix = shortid.generate(); // automatically generated
