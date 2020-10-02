@@ -96,50 +96,51 @@ app.get("/api/whoami", (req, res) => {
 
 // URL Shortener Microservice
 // define the schema and build a model to store saved urls
-let urlSchema = new mongoose.Schema({
-  original: {type: String, required: true},
-  short: Number
-});  
+let ShortUrl = mongoose.model('HerokuUrl', new mongoose.Schema({
+  original_url:  String,
+  short_url:  String,
+  suffix:  String
+}));
 
-let Url = mongoose.model('HerokuUrl', urlSchema);
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
+// parse application/json
+app.use(bodyParser.json())
 
-let responseObject = {}
+app.post("/api/shorturl/new", (req, res) => {
+  let client_requested_url = req.body.url; // from input box
+  let suffix = shortid.generate(); // automatically generated
 
-app.post("/api/shorturl/new", bodyParser.urlencoded({ extended: false }), (req, res) => {
-  let inputUrl = req.body['url']; 
+  // this works
+  // res.json({
+  //   1: client_requested_url,
+  //   2: suffix
+  // })
 
-  responseObject['original_url'] = inputUrl
-
-  let inputShort = 1;
-
-  Url.findOne({})
-  // sort the short by descending order so you get the highest number one
-    .sort({short: 'desc'})
-    .exec((error, result) => {
-    // no error and found document
-      if(!error && result != undefined) {
-        // the new url will have short incremented
-        inputShort = result.short + 1
-      }
-      if (!error) {
-        // find one, if it doesn't exist, create it, if it exists, update it
-        // from mongoose: A.findOneAndUpdate(conditions, update, options, callback) // executes
-        Url.findOneAndUpdate(
-          // already exist
-          {original: inputUrl}, // conditions
-          {original: inputUrl, short: inputShort}, // update
-          // new returns the newly updated/saved record. upset creates the object if it doesn't exist
-          {new: true, upsert: true}, // options
-          (error, savedUrl) => { // callback
-            if (!error) {
-              responseObject['short_url'] = savedUrl.short
-              res.json(responseObject);
-            }
-          }
-        ); 
-      }
+  let newUrl = new ShortUrl({
+    original_url: client_requested_url,
+    // short_url: client_requested_url + "/api/shorturl/" + suffix,
+    short_url: __dirname + "/api/shorturl/" + suffix,
+    suffix: suffix // suffix: suffix
   })
-})
+
+  // this works
+  // res.json({
+  //   'info': newUrl
+  // })
+
+  // app hang at this save
+  newUrl.save((err, doc) => {
+    if (err) return console.error(err);
+    // if (err) console.log(err);
+    // res.send('Does this work?')
+    res.json({
+      "original_url": newUrl.original_url,
+      "short_url": newUrl.short_url,
+      "suffix": newUrl.suffix // suffix: suffix
+      });
+    });
+});
 
 // app.get("/api/shorturl/:suffix", (req, res) => {
 //   let urlSuffix = req.params.suffix;
