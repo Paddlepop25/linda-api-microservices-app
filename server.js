@@ -2,13 +2,16 @@
 // where your node app starts
 
 // init project
+require('dotenv').config();
 var express = require('express');
-// var mongo = require('mongo');
-// var mongodb = require('mongodb');
+var mongodb = require('mongodb');
+var mongoose = require('mongoose');
+var bodyParser = require('body-parser');
+var shortid = require('shortid');
 var app = express();
 var port = process.env.PORT || 3000
 
-mongoose.connect(process.env.DB_URI);
+mongoose.connect(process.env.MONGODB_URI, {useNewUrlParser: true, useUnifiedTopology: true});
 
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
 // so that your API is remotely testable by FCC 
@@ -88,12 +91,44 @@ app.get("/api/whoami", (req, res) => {
 })
 
 // URL Shortener Microservice
+// define the schema and build a model to store saved urls
+const { Schema } = mongoose;
+let UrlModel = mongoose.model('shortenedUrl', new Schema({
+  original_url:  String,
+  short_url:  String,
+  suffix:  String
+}));
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
+// parse application/json
+app.use(bodyParser.json())
+
 app.post("/api/shorturl/new", (req, res) => {
-  console.log(req.params)
-  res.json({
-    success: 'yay'
+  let userInputUrl = req.body.url; // from input box
+  let suffix = shortid.generate(); // automatically generated
+
+  let newUrl = new UrlModel({
+    original_url: userInputUrl,
+    short_url: __dirname + "/api/shortcut/" + suffix,
+    suffix // suffix: suffix
   })
 
+  newUrl.save((err, doc) => {
+    if (err) return console.error(err);
+    res.json({
+      original_url: newUrl.original_url,
+      short_url: newUrl.short_url,
+      suffix // suffix: suffix
+    })
+  });
+})
+
+app.get("/api/shorturl/:suffix", (req, res) => {
+  let urlSuffix = req.params.suffix;
+  UrlModel.findOne({ suffix: urlSuffix }).then(foundUrl => {
+    res.redirect(foundUrl.original_url);
+  });
 })
 
 // listen for requests
