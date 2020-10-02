@@ -125,20 +125,20 @@ app.post("/api/shorturl/new", (req, res) => {
   })
 
   // this works
-  res.json({
-    'info': newUrl
-  })
+  // res.json({
+  //   'info': newUrl
+  // })
 
   // app hang at this save
   newUrl.save((err, doc) => {
     if (err) return console.err(err);
     // if (err) console.log(err);
-    res.send('Does this work?')
-    // res.json({
-    //   original_url: newUrl.original_url,
-    //   short_url: newUrl.short_url,
-    //   suffix: newUrl.suffix // suffix: suffix
-    // });
+    // res.send('Does this work?')
+    res.json({
+      original_url: newUrl.original_url,
+      short_url: newUrl.short_url,
+      suffix: newUrl.suffix // suffix: suffix
+    });
     });
 });
 
