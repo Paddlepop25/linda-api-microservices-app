@@ -118,9 +118,9 @@ app.post("/api/shorturl/new", (req, res) => {
     suffix // suffix: suffix
   })
 
-  res.json({
-    'info': newUrl
-  })
+  // res.json({
+  //   'info': newUrl
+  // })
 
   newUrl.save((err, doc) => {
     if (err) return console.error(err);
