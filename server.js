@@ -108,17 +108,11 @@ app.post("/api/shorturl/new", (req, res) => {
   let userInputUrl = req.body.url; // from input box
   let suffix = shortid.generate(); // automatically generated
 
-  console.log("------>", userInputUrl, suffix)
-
-  res.json({
-    "url": userInputUrl,
-    "suffix": suffix
+  let newUrl = new UrlModel({
+    original_url: userInputUrl,
+    short_url: userInputUrl + "/api/shortcut/" + suffix,
+    suffix // suffix: suffix
   })
-  // let newUrl = new UrlModel({
-  //   original_url: userInputUrl,
-  //   short_url: __dirname + "/api/shortcut/" + suffix,
-  //   suffix // suffix: suffix
-  // })
 
   // newUrl.save((err, doc) => {
   //   if (err) return console.error(err);
