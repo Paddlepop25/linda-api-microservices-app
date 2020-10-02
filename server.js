@@ -110,26 +110,26 @@ app.post("/api/shorturl/new", (req, res) => {
 
   let newUrl = new UrlModel({
     original_url: userInputUrl,
-    short_url: userInputUrl + "/api/shortcut/" + suffix,
+    short_url: userInputUrl + "/api/shorturl/" + suffix,
     suffix // suffix: suffix
   })
 
-  // newUrl.save((err, doc) => {
-  //   if (err) return console.error(err);
-  //   res.json({
-  //     original_url: newUrl.original_url,
-  //     short_url: newUrl.short_url,
-  //     suffix // suffix: suffix
-  //   })
-  // });
-})
+  newUrl.save((err, doc) => {
+    if (err) return console.error(err);
+    res.json({
+      original_url: newUrl.original_url,
+      short_url: newUrl.short_url,
+      suffix // suffix: suffix
+    });
+  });
+});
 
-// app.get("/api/shorturl/:suffix", (req, res) => {
-//   let urlSuffix = req.params.suffix;
-//   UrlModel.findOne({ suffix: urlSuffix }).then(foundUrl => {
-//     res.redirect(foundUrl.original_url);
-//   });
-// })
+app.get("/api/shorturl/:suffix", (req, res) => {
+  let urlSuffix = req.params.suffix;
+  UrlModel.findOne({ suffix: urlSuffix }).then(foundUrl => {
+    res.redirect(foundUrl.original_url);
+  });
+})
 
 // listen for requests
 var listener = app.listen(port, function () {
