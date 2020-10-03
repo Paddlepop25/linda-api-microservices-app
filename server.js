@@ -113,8 +113,7 @@ app.post("/api/shorturl/new", (req, res) => {
 
   let newUrl = new ShortUrl({
     original_url: client_requested_url,
-    short_url: client_requested_url + "/api/shorturl/" + suffix,
-    // short_url: __dirname + "/api/shorturl/" + suffix,
+    short_url: client_requested_url + "api/shorturl/" + suffix,
     suffix: suffix // suffix: suffix
   })
 
@@ -122,9 +121,9 @@ app.post("/api/shorturl/new", (req, res) => {
   newUrl.save((err, doc) => {
     if (err) return console.error(err);
     res.json({
-      "original_url": newUrl.original_url,
-      "short_url": newUrl.short_url,
-      "suffix": newUrl.suffix // suffix: suffix
+      original_url: newUrl.original_url,
+      short_url: newUrl.short_url,
+      suffix: newUrl.suffix // suffix: suffix
       });
     });
 });
