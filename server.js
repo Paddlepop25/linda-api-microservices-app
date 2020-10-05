@@ -8,6 +8,7 @@ var mongodb = require('mongodb');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var shortid = require('shortid');
+var multer = require('multer');
 var app = express();
 var port = process.env.PORT || 3000
 
@@ -40,6 +41,10 @@ app.get("/requestheaderparser", function (req, res) {
 
 app.get("/urlshortener", function (req, res) {
   res.sendFile(__dirname + '/views/urlshortener.html');
+});
+
+app.get("/filemetadata", function (req, res) {
+  res.sendFile(__dirname + '/views/filemetadata.html');
 });
 
 // testing API endpoint... 
@@ -109,15 +114,23 @@ app.use(bodyParser.json())
 
 app.post("/api/shorturl/new", (req, res) => {
   let client_requested_url = req.body.url; // from input box
+
+  let urlRegex = new RegExp(/[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi);
+
+  if (!client_requested_url.match(urlRegex)) {
+    res.json({
+      "error":"invalid URL"
+    })
+  }
+
   let suffix = shortid.generate(); // automatically generated
 
   let newUrl = new ShortUrl({
     original_url: client_requested_url,
-    short_url: client_requested_url + "api/shorturl/" + suffix,
+    short_url: client_requested_url + "/api/shorturl/" + suffix,
     suffix: suffix // suffix: suffix
   })
 
-  // app hang at this save
   newUrl.save((err, doc) => {
     if (err) return console.error(err);
     res.json({
@@ -134,6 +147,18 @@ app.get("/api/shorturl/:suffix", (req, res) => {
     res.redirect(foundUrl.original_url);
   });
 })
+
+// File Metadata Microservice
+app.post("/api/fileanalyse", multer().single('upfile'), (req, res) => {
+  let name = req.file.originalname;
+  let type = req.file.mimetype;
+  let { size } = req.file;
+  res.json({
+    name,
+    type,
+    size
+  });
+});
 
 // listen for requests
 var listener = app.listen(port, function () {
