@@ -43,6 +43,10 @@ app.get("/urlshortener", function (req, res) {
   res.sendFile(__dirname + '/views/urlshortener.html');
 });
 
+app.get("/exercisetracker", function (req, res) {
+  res.sendFile(__dirname + '/views/exercisetracker.html');
+});
+
 app.get("/filemetadata", function (req, res) {
   res.sendFile(__dirname + '/views/filemetadata.html');
 });
@@ -147,6 +151,9 @@ app.get("/api/shorturl/:suffix", (req, res) => {
     res.redirect(foundUrl.original_url);
   });
 })
+
+// Exercise Tracker
+
 
 // File Metadata Microservice
 app.post("/api/fileanalyse", multer().single('upfile'), (req, res) => {
