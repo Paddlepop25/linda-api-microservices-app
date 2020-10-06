@@ -153,7 +153,37 @@ app.get("/api/shorturl/:suffix", (req, res) => {
 })
 
 // Exercise Tracker
+let ExerciseUser = mongoose.model('ExerciseUser', new mongoose.Schema({
+  _id:  String,
+  username:  { type: String, unique: true },
+}));
 
+app.post("/api/exercise/new-user", (req, res) => {
+  let mongooseGenerateID = mongoose.Types.ObjectId();
+  let exerciseUser = new ExerciseUser({
+    username: req.body.username,
+    _id: mongooseGenerateID
+  });
+  exerciseUser.save((err, doc) => {
+    if (err) return console.error(err);
+    res.json({
+      username: exerciseUser.username,
+      _id: exerciseUser["_id"]
+    });
+  });
+})
+
+app.get("/api/exercise/users", (req, res) => {
+  ExerciseUser.find({}, (error, exerciseUsers) => {
+    if (error) return console.log(error);
+    res.json({
+      users: exerciseUsers
+    })
+  })
+  // res.json({
+  //   info: res
+  // })
+})
 
 // File Metadata Microservice
 app.post("/api/fileanalyse", multer().single('upfile'), (req, res) => {
