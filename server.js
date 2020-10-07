@@ -176,14 +176,9 @@ app.post("/api/exercise/new-user", (req, res) => {
 app.get("/api/exercise/users", (req, res) => {
   ExerciseUser.find({}, (error, exerciseUsers) => {
     if (error) return console.log(error);
-    res.json({
-      users: exerciseUsers
-    })
-  })
-  // res.json({
-  //   info: res
-  // })
-})
+    res.json(exerciseUsers)
+  });
+});
 
 // File Metadata Microservice
 app.post("/api/fileanalyse", multer().single('upfile'), (req, res) => {
